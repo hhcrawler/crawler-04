@@ -75,7 +75,7 @@ function startWebsocket() {
                         "",
                         {
                             "agentId": "1",
-                            "accessToken": "13-d1dbf05617864379593e1d43dc29aebb",
+                            "accessToken": process.env.ACCESS_TOKEN,
                             "reconnect": false
                         }
                     ]
