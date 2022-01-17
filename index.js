@@ -52,12 +52,13 @@ function startWebsocket(accessToken) {
                         const rsmd5 = data[1].rsmd5;
                         let is_even = true;
                         const split = rsmd5.split(':');
-                        if (split[0] == '[3D - 1T]' || split[0] == '[3T - 1D]') is_even = false;
+                        if (split[0].includes('1')) is_even = false;
                         console.log(rsmd5);
                         const mgData = new Data2({
                             is_even: is_even,
                             result: split[0],
-                            rsmd5: `${split[1]}`
+                            rsmd5: `${split[1]}`,
+                            accessToken:accessToken
                         });
                         try {
                             await mgData.save();
