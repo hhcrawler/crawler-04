@@ -8,6 +8,6 @@ const dataSchema = mongoose.Schema(
     },
 );
 
-const Data = mongoose.model('data', dataSchema);
+const Data = mongoose.model('new-data', dataSchema);
 
 module.exports= Data;

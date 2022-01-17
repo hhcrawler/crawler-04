@@ -1,12 +1,14 @@
 var WebSocketClient = require('websocket').client;
-const Data = require("./models/data.model");
+const Data2 = require("./models/data.model");
 const mongoose = require('mongoose')
 var http = require('http');
+const axios = require('axios');
+
 require('dotenv').config()
 
 
 
-function startWebsocket() {
+function startWebsocket(accessToken) {
     var client = new WebSocketClient();
 
     client.on('connectFailed', function (error) {
@@ -18,28 +20,44 @@ function startWebsocket() {
         console.log('WebSocket Client Connected');
         connection.on('error', function (error) {
             console.log("Connection Error: " + error.toString());
-            startWebsocket();
+            startWebsocket(accessToken);
         });
         connection.on('close', function () {
             console.log('echo-protocol Connection Closed');
-            startWebsocket();
+            axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
+                        {
+                            "username": "jklgf123",
+                            "password": "bnmghjtyu",
+                            "app_id": "b52.club",
+                            "os": "OS X",
+                            "device": "Computer",
+                            "browser": "chrome",
+                            "fg": "kjsdhfgjksdfhkjasfhajksdhasjkdha"
+                          })
+                          .then(function (response) {
+                            console.log(response.data.data[0].token);
+                            
+                            startWebsocket(response.data.data[0].token);
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          });
         });
 
         connection.on('message', async function (message) {
             if (message.type === 'utf8') {
-                // console.log("Received: '" + message.utf8Data + "'");
                 const data = JSON.parse(message.utf8Data);
                 if (data[0] === 5) {
                     if ('rsmd5' in data[1]) {
                         const rsmd5 = data[1].rsmd5;
-                        let is_even=true;
-                        const split=rsmd5.split(':');
-                        if (split[0]=='[3D - 1T]' || split[0]=='[3T - 1D]') is_even=false;
+                        let is_even = true;
+                        const split = rsmd5.split(':');
+                        if (split[0] == '[3D - 1T]' || split[0] == '[3T - 1D]') is_even = false;
                         console.log(rsmd5);
-                        const mgData = new Data({
+                        const mgData = new Data2({
                             is_even: is_even,
                             result: split[0],
-                            rsmd5: `v2_${split[1]}`
+                            rsmd5: `${split[1]}`
                         });
                         try {
                             await mgData.save();
@@ -57,6 +75,7 @@ function startWebsocket() {
                     }
                     else {
                         console.log('login failed');
+                        
                     }
 
                 }
@@ -75,7 +94,7 @@ function startWebsocket() {
                         "",
                         {
                             "agentId": "1",
-                            "accessToken": process.env.ACCESS_TOKEN,
+                            "accessToken": accessToken,
                             "reconnect": false
                         }
                     ]
@@ -87,7 +106,8 @@ function startWebsocket() {
     client.connect('wss://api-card.b5wssb.com/websocket');
 }
 
-startWebsocket();
+startWebsocket('123');
+
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.fezar.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 mongoose
