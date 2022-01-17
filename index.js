@@ -1,11 +1,10 @@
 var WebSocketClient = require('websocket').client;
-const Data2 = require("./models/data.model");
+const Data = require("./models/data.model");
 const mongoose = require('mongoose')
 var http = require('http');
 const axios = require('axios');
 
 require('dotenv').config()
-
 
 
 function startWebsocket(accessToken) {
@@ -24,7 +23,43 @@ function startWebsocket(accessToken) {
         });
         connection.on('close', function () {
             console.log('echo-protocol Connection Closed');
-            axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
+            startWebsocket(accessToken);
+        });
+
+        connection.on('message', async function (message) {
+            if (message.type === 'utf8') {
+                const data = JSON.parse(message.utf8Data);
+                if (data[0] === 5) {
+                    if ('rsmd5' in data[1]) {
+                        const rsmd5 = data[1].rsmd5;
+                        let is_even = true;
+                        const split = rsmd5.split(':');
+                        if (split[0].includes('1')) is_even = false;
+                        console.log(rsmd5);
+                        const mgData = new Data({
+                            is_even: is_even,
+                            result: split[0],
+                            rsmd5: `${split[1]}`,
+                            access_token:accessToken
+                        });
+                        try {
+                            await mgData.save();
+                            console.log('save success');
+
+                        } catch (err){
+                            console.log(err);
+                        }
+                    }
+                    return;
+                }
+                if (data[0] === 1) {
+                    if (data[1] == true) {
+                        console.log('login success');
+                        connection.send(JSON.stringify([3, "Simms", 157, ""]));
+                    }
+                    else {
+                        console.log('login failed');
+                        axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
                         {
                             "username": "jklgf123",
                             "password": "bnmghjtyu",
@@ -42,41 +77,6 @@ function startWebsocket(accessToken) {
                           .catch(function (error) {
                             console.log(error);
                           });
-        });
-
-        connection.on('message', async function (message) {
-            if (message.type === 'utf8') {
-                const data = JSON.parse(message.utf8Data);
-                if (data[0] === 5) {
-                    if ('rsmd5' in data[1]) {
-                        const rsmd5 = data[1].rsmd5;
-                        let is_even = true;
-                        const split = rsmd5.split(':');
-                        if (split[0].includes('1')) is_even = false;
-                        console.log(rsmd5);
-                        const mgData = new Data2({
-                            is_even: is_even,
-                            result: split[0],
-                            rsmd5: `${split[1]}`,
-                            accessToken:accessToken
-                        });
-                        try {
-                            await mgData.save();
-                            console.log('save success');
-
-                        } catch {
-                        }
-                    }
-                    return;
-                }
-                if (data[0] === 1) {
-                    if (data[1] == true) {
-                        console.log('login success');
-                        connection.send(JSON.stringify([3, "Simms", 157, ""]));
-                    }
-                    else {
-                        console.log('login failed');
-                        
                     }
 
                 }
