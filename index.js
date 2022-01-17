@@ -32,7 +32,7 @@ function startWebsocket(accessToken) {
                             "os": "OS X",
                             "device": "Computer",
                             "browser": "chrome",
-                            "fg": "kjsdhfgjksdfhkjasfhajksdhasjkdha"
+                            "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
                           })
                           .then(function (response) {
                             console.log(response.data.data[0].token);
