@@ -59,24 +59,24 @@ function startWebsocket(accessToken) {
                     }
                     else {
                         console.log('login failed');
-                        axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
-                        {
-                            "username": "jklgf123",
-                            "password": "bnmghjtyu",
-                            "app_id": "b52.club",
-                            "os": "OS X",
-                            "device": "Computer",
-                            "browser": "chrome",
-                            "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
-                          })
-                          .then(function (response) {
-                            console.log(response.data.data[0].token);
+                        // axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
+                        // {
+                        //     "username": "jklgf123",
+                        //     "password": "bnmghjtyu",
+                        //     "app_id": "b52.club",
+                        //     "os": "OS X",
+                        //     "device": "Computer",
+                        //     "browser": "chrome",
+                        //     "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
+                        //   })
+                        //   .then(function (response) {
+                        //     console.log(response.data.data[0].token);
                             
-                            startWebsocket(response.data.data[0].token);
-                          })
-                          .catch(function (error) {
-                            console.log(error);
-                          });
+                        //     startWebsocket(response.data.data[0].token);
+                        //   })
+                        //   .catch(function (error) {
+                        //     console.log(error);
+                        //   });
                     }
 
                 }
@@ -107,7 +107,7 @@ function startWebsocket(accessToken) {
     client.connect('wss://api-card.b5wssb.com/websocket');
 }
 
-startWebsocket('123');
+startWebsocket('13-16d27d75dfabe6a54d9b40a2c14665f2');
 
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.fezar.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
