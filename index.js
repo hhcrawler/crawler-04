@@ -39,7 +39,7 @@ function startWebsocket() {
                         const mgData = new Data({
                             is_even: is_even,
                             result: split[0],
-                            rsmd5: split[1]
+                            rsmd5: `v2_${split[1]}`
                         });
                         try {
                             await mgData.save();
