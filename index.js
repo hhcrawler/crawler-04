@@ -24,7 +24,24 @@ function startWebsocket(accessToken) {
         });
         connection.on('close', function () {
             console.log('echo-protocol Connection Closed');
-           
+            axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
+                        {
+                            "username": "jklgf123",
+                            "password": "bnmghjtyu",
+                            "app_id": "b52.club",
+                            "os": "OS X",
+                            "device": "Computer",
+                            "browser": "chrome",
+                            "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
+                          })
+                          .then(function (response) {
+                            console.log(response.data.data[0].token);
+                            
+                            startWebsocket(response.data.data[0].token);
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          });
         });
 
         connection.on('message', async function (message) {
@@ -58,24 +75,7 @@ function startWebsocket(accessToken) {
                     }
                     else {
                         console.log('login failed');
-                        axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
-                        {
-                            "username": "jklgf123",
-                            "password": "bnmghjtyu",
-                            "app_id": "b52.club",
-                            "os": "OS X",
-                            "device": "Computer",
-                            "browser": "chrome",
-                            "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
-                          })
-                          .then(function (response) {
-                            console.log(response.data.data[0].token);
-                            
-                            startWebsocket(response.data.data[0].token);
-                          })
-                          .catch(function (error) {
-                            console.log(error);
-                          });
+                        
                     }
 
                 }
