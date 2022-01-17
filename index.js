@@ -107,7 +107,7 @@ function startWebsocket(accessToken) {
     client.connect('wss://api-card.b5wssb.com/websocket');
 }
 
-startWebsocket('13-16d27d75dfabe6a54d9b40a2c14665f2');
+startWebsocket(process.env.ACCESS_TOKEN);
 
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.fezar.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
