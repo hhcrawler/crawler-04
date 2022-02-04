@@ -6,7 +6,7 @@ const axios = require('axios');
 
 require('dotenv').config()
 
-var currentSid=-1;
+var currentSid=1;
 
 function startWebsocket(accessToken) {
     var client = new WebSocketClient();
@@ -50,7 +50,7 @@ function startWebsocket(accessToken) {
                         try {
                             await mgData.save();
                             console.log(`save success${currentSid}`);
-                            currentSid--;
+                            currentSid++;
                             connection.send(JSON.stringify(["6","MiniGame","taixiuKCBPlugin",{"cmd":2009,"sid":`${currentSid}`,"aid":"1"}]));
 
                         } catch (err){
@@ -105,8 +105,8 @@ mongoose
     .then(async () => {
         console.log('Connect Mongodb Successfully');
         console.log('finding current sid...');
-        const  fdata=await Data.find().sort({sessionId:1}).limit(1);
-        currentSid=fdata[0].sessionId-1;
+        const  fdata=await Data.find({sessionId:{$lte:150000}}).sort({sessionId:-1}).limit(1);
+        currentSid=fdata[0].sessionId+1;
         console.log(`Current sid: ${currentSid}`);
         startWebsocket(process.env.ACCESS_TOKEN);
     })

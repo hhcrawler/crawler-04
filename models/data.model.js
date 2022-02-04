@@ -10,6 +10,6 @@ const dataSchema = mongoose.Schema(
     },
 );
 
-const Data = mongoose.model('fa88', dataSchema);
+const Data = mongoose.model('fa88-02', dataSchema);
 
 module.exports= Data;
