@@ -31,8 +31,7 @@ function startWebsocket(accessToken) {
             if (message.type === 'utf8') {
                 const data = JSON.parse(message.utf8Data);
                 if (data[0] === 5) {
-                    if ('rs' in data[1] && 'sid' in data[1]) {
-                        const rs = data[1].rs;
+                    if ('sid' in data[1]) {
                         const sid = data[1].sid;
                         if (sid==currentSid){
                             var d1=data[1].d1;
@@ -108,7 +107,7 @@ mongoose
         const  fdata=await Data.find({sessionId:{$lte:250000,$gt:150000}}).sort({sessionId:-1}).limit(1);
         currentSid=fdata[0].sessionId+1;
         console.log(`Current sid: ${currentSid}`);
-        startWebsocket(process.env.ACCESS_TOKEN);
+        startWebsocket(process.env.ACCESS_TOKEN); 
     })
     .catch((error) => console.log(error));
 
