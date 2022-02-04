@@ -6,6 +6,7 @@ const axios = require('axios');
 
 require('dotenv').config()
 
+var currentSid=-1;
 
 function startWebsocket(accessToken) {
     var client = new WebSocketClient();
@@ -30,53 +31,47 @@ function startWebsocket(accessToken) {
             if (message.type === 'utf8') {
                 const data = JSON.parse(message.utf8Data);
                 if (data[0] === 5) {
-                    if ('rsmd5' in data[1]) {
-                        const rsmd5 = data[1].rsmd5;
-                        let is_even = true;
-                        const split = rsmd5.split(':');
-                        if (split[0].includes('1')) is_even = false;
-                        console.log(rsmd5);
+                    if ('rs' in data[1] && 'sid' in data[1]) {
+                        const rs = data[1].rs;
+                        const sid = data[1].sid;
+                        if (sid==currentSid){
+                            var d1=data[1].d1;
+                            var d2=data[1].d2;
+                            var d3=data[1].d3;
+                      
+                      
                         const mgData = new Data({
-                            is_even: is_even,
-                            result: split[0],
-                            rsmd5: `${split[1]}`,
-                            access_token:accessToken
+                            big: d1+d2+d3>10,
+                            sessionId: data[1].sid,
+                            d1: d1,
+                            d2: d2,
+                            d3: d3
                         });
                         try {
                             await mgData.save();
-                            console.log('save success');
+                            console.log(`save success${currentSid}`);
+                            currentSid--;
+                            connection.send(JSON.stringify(["6","MiniGame","taixiuKCBPlugin",{"cmd":2009,"sid":`${currentSid}`,"aid":"1"}]));
 
                         } catch (err){
                             console.log(err);
                         }
+                    }
                     }
                     return;
                 }
                 if (data[0] === 1) {
                     if (data[1] == true) {
                         console.log('login success');
-                        connection.send(JSON.stringify([3, "Simms", 157, ""]));
+                        if (currentSid!=-1){
+                        connection.send(JSON.stringify(["6","MiniGame","taixiuKCBPlugin",{"cmd":2009,"sid":`${currentSid}`,"aid":"1"}]));
+                    }
+                    else{
+                        console.log('invalid current sid');
+                    }
                     }
                     else {
                         console.log('login failed');
-                        // axios.post('https://api-gw.25bp-tank.net/user/login.aspx', 
-                        // {
-                        //     "username": "jklgf123",
-                        //     "password": "bnmghjtyu",
-                        //     "app_id": "b52.club",
-                        //     "os": "OS X",
-                        //     "device": "Computer",
-                        //     "browser": "chrome",
-                        //     "fg": "kjhdhfgjksdfhkjasfhajksdhasjkxca"
-                        //   })
-                        //   .then(function (response) {
-                        //     console.log(response.data.data[0].token);
-                            
-                        //     startWebsocket(response.data.data[0].token);
-                        //   })
-                        //   .catch(function (error) {
-                        //     console.log(error);
-                        //   });
                     }
 
                 }
@@ -85,29 +80,20 @@ function startWebsocket(accessToken) {
             }
         });
 
-        function login() {
+        async function login() {
             if (connection.connected) {
+
                 connection.send(JSON.stringify(
-                    [
-                        1,
-                        "Simms",
-                        "",
-                        "",
-                        {
-                            "agentId": "1",
-                            "accessToken": accessToken,
-                            "reconnect": false
-                        }
-                    ]
+                    [1,"MiniGame","","",{"agentId":"1","accessToken":`${process.env.ACCESS_TOKEN}`,"reconnect":true}]
                 ));
             }
         }
     });
 
-    client.connect('wss://api-card.b5wssb.com/websocket');
+    client.connect('wss://api-mini.gowsazhjo.net/websocket');
 }
 
-startWebsocket(process.env.ACCESS_TOKEN);
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.fezar.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -116,8 +102,13 @@ mongoose
         uri,
         { useNewUrlParser: true, useUnifiedTopology: true }
     )
-    .then(() => {
+    .then(async () => {
         console.log('Connect Mongodb Successfully');
+        console.log('finding current sid...');
+        const  fdata=await Data.find().sort({sessionId:1}).limit(1);
+        currentSid=fdata[0].sessionId-1;
+        console.log(`Current sid: ${currentSid}`);
+        startWebsocket(process.env.ACCESS_TOKEN);
     })
     .catch((error) => console.log(error));
 
